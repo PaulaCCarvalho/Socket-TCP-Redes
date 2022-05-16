@@ -43,13 +43,6 @@ def main(args):
     serverPort = int(args[2])
     mensagem = args[3]
     CHAVE = int(args[4])
-
-    print(f'-'*40)
-    print(mensagem)
-    aux = criptografia(mensagem, CHAVE)
-    print(aux)
-    print(descriptografia(aux, CHAVE))
-    print(f'-'*40)
     
     clientSocket = socket(AF_INET, SOCK_STREAM)
     clientSocket.connect((serverName, serverPort))
@@ -58,6 +51,7 @@ def main(args):
     string = criptografia(mensagem, CHAVE)
     clientSocket.send(pack('>150si', string.encode(), CHAVE))
 
+    clientSocket.settimeout(15.0)
     conteudo = clientSocket.recv(1024)
 
     CHAVE = unpack(">150si", conteudo)[1]

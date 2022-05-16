@@ -2,6 +2,9 @@
 from socket import *
 from struct import *
 
+from threading import Thread
+from time import sleep
+
 
 
 def criptografia(mensagem, CHAVE):
@@ -39,16 +42,9 @@ def descriptografia(mensagem, CHAVE):
          
     return ''.join(descriptada)
 
-
-
-serverPort = 8888
-serverSocket = socket(AF_INET, SOCK_STREAM)
-serverSocket.bind(('', serverPort))
-serverSocket.listen(10)
-print('O servidor está pronto para receber...')
-
-while True: 
-    connectionSocket, clientAdress = serverSocket.accept()
+def conexao(connectionSocket, clientAdress):
+        
+    connectionSocket.settimeout(15.0)    
     conteudo = connectionSocket.recv(1024)
     
     CHAVE = unpack(">150si", conteudo)[1]
@@ -60,4 +56,26 @@ while True:
     criptografar = criptografia(descriptografar, CHAVE)
     connectionSocket.send(pack('>150si', criptografar.encode(), CHAVE))
 
+    print('Cliente ' + clientAdress[0] + ' desconectado!')
+
     connectionSocket.close()
+
+serverPort = 5000
+serverSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind(('', serverPort))
+serverSocket.listen(1)
+print('O servidor está pronto para receber...')
+
+while True: 
+    connectionSocket, clientAdress = serverSocket.accept()
+    print('Cliente ' + clientAdress[0] + ' conectado!')
+    processo = Thread(target=conexao, args=(connectionSocket, clientAdress))
+    processo.start()
+
+
+
+
+
+    
+    
+    
